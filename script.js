@@ -3,7 +3,7 @@
 // Chunk 3
 // Player Modal + Import / Export
 // ======================================
-
+alert("JS loaded");
 // ---------- Selected ----------
 
 let selectedPlayer=null;
