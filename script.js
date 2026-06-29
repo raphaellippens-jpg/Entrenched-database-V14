@@ -1,5 +1,1006 @@
 // ======================================
 // Prototype
+// Chunk 1
+// Foundation
+// ======================================
+
+// ---------- Elements ----------
+
+const playerName=
+document.getElementById(
+"playerName"
+);
+
+const danger=
+document.getElementById(
+"danger"
+);
+
+const difficulty=
+document.getElementById(
+"difficulty"
+);
+
+const rarity=
+document.getElementById(
+"rarity"
+);
+
+const dangerValue=
+document.getElementById(
+"dangerValue"
+);
+
+const difficultyValue=
+document.getElementById(
+"difficultyValue"
+);
+
+const addPlayer=
+document.getElementById(
+"addPlayer"
+);
+
+const playerList=
+document.getElementById(
+"playerList"
+);
+
+const playerCount=
+document.getElementById(
+"playerCount"
+);
+
+const search=
+document.getElementById(
+"search"
+);
+
+const sort=
+document.getElementById(
+"sort"
+);
+
+const themeToggle=
+document.getElementById(
+"themeToggle"
+);
+
+const status=
+document.getElementById(
+"status"
+);
+
+const canvas=
+document.getElementById(
+"graph"
+);
+
+const ctx=
+canvas.getContext(
+"2d"
+);
+
+// ---------- Save Manager ----------
+
+const saveManager=
+document.getElementById(
+"saveManager"
+);
+
+const saveList=
+document.getElementById(
+"saveList"
+);
+
+const app=
+document.getElementById(
+"app"
+);
+
+const newSave=
+document.getElementById(
+"newSave"
+);
+
+const openSaveButton=
+document.getElementById(
+"openSave"
+);
+
+const renameSaveButton=
+document.getElementById(
+"renameSave"
+);
+
+const deleteSaveButton=
+document.getElementById(
+"deleteSave"
+);
+
+const exportSaveButton=
+document.getElementById(
+"exportSave"
+);
+
+const importSaveButton=
+document.getElementById(
+"importSave"
+);
+
+// ---------- Import ----------
+
+const importFile=
+document.getElementById(
+"importFile"
+);
+
+// ---------- Modal ----------
+
+const playerModal=
+document.getElementById(
+"playerModal"
+);
+
+const deleteModal=
+document.getElementById(
+"deleteModal"
+);
+
+const modalName=
+document.getElementById(
+"modalName"
+);
+
+const modalRarity=
+document.getElementById(
+"modalRarity"
+);
+
+const modalDanger=
+document.getElementById(
+"modalDanger"
+);
+
+const modalDifficulty=
+document.getElementById(
+"modalDifficulty"
+);
+
+const modalDescription=
+document.getElementById(
+"modalDescription"
+);
+
+const saveDescription=
+document.getElementById(
+"saveDescription"
+);
+
+const editPlayerButton=
+document.getElementById(
+"editPlayer"
+);
+
+const deletePlayerButton=
+document.getElementById(
+"deletePlayerModal"
+);
+
+const closeModal=
+document.getElementById(
+"closeModal"
+);
+
+const cancelDelete=
+document.getElementById(
+"cancelDelete"
+);
+
+const confirmDelete=
+document.getElementById(
+"confirmDelete"
+);
+
+// ---------- Constants ----------
+
+const MAX_VALUE=25;
+
+const rarityColors={
+
+Legendary:"#ff3b30",
+
+Epic:"#8b5cf6",
+
+Rare:"#00bcd4",
+
+"Three-Quarters-Rare":"#ff9800",
+
+"Semi-Rare":"#ffd600",
+
+Uncommon:"#2196f3",
+
+Common:"#4caf50"
+
+};
+
+// ---------- Saves ----------
+
+let saves=
+
+JSON.parse(
+
+localStorage.getItem(
+"saves"
+)
+
+||
+
+"{}"
+
+);
+
+if(
+
+Object.keys(
+saves
+).length===0
+
+){
+
+saves={
+
+"Main Database":{
+
+players:[]
+
+}
+
+};
+
+}
+
+let currentSave=
+
+localStorage.getItem(
+"currentSave"
+)
+
+||
+
+"Main Database";
+
+if(
+
+!saves[currentSave]
+
+){
+
+currentSave=
+
+Object.keys(
+saves
+)[0];
+
+}
+
+let players=
+
+saves[currentSave]
+.players;
+
+function saveEverything(){
+
+saves[currentSave]
+.players=players;
+
+localStorage.setItem(
+
+"saves",
+
+JSON.stringify(
+saves
+)
+
+);
+
+localStorage.setItem(
+
+"currentSave",
+
+currentSave
+
+);
+
+}
+
+let darkMode=
+
+localStorage.getItem(
+"theme"
+)
+
+==="dark";
+// ======================================
+// Prototype
+// Chunk 1
+// Continued
+// ======================================
+
+// ---------- Theme ----------
+
+function applyTheme(save=true){
+
+document.body.classList.toggle(
+
+"dark",
+
+darkMode
+
+);
+
+themeToggle.textContent=
+
+darkMode?
+
+"☀️ Light Mode":
+
+"🌙 Dark Mode";
+
+if(save){
+
+localStorage.setItem(
+
+"theme",
+
+darkMode?
+
+"dark":
+
+"light"
+
+);
+
+}
+
+if(
+
+typeof drawGraph===
+
+"function"
+
+){
+
+drawGraph();
+
+}
+
+}
+
+applyTheme(false);
+
+themeToggle.onclick=()=>{
+
+darkMode=!darkMode;
+
+applyTheme();
+
+};
+
+// ---------- Helpers ----------
+
+function normalizePlayers(){
+
+players.forEach(player=>{
+
+if(
+
+player.id===undefined
+
+){
+
+player.id=
+
+Date.now().toString()
+
++
+
+Math.random();
+
+}
+
+if(
+
+player.description===undefined
+
+){
+
+player.description="";
+
+}
+
+});
+
+}
+
+normalizePlayers();
+
+function switchSave(name){
+
+if(
+
+!saves[name]
+
+){
+
+return;
+
+}
+
+currentSave=name;
+
+players=
+
+saves[name].players;
+
+normalizePlayers();
+
+saveEverything();
+
+if(
+
+typeof refresh===
+
+"function"
+
+){
+
+refresh();
+
+}
+
+}
+
+function createNewSave(){
+
+const name=
+
+prompt(
+
+"Save name"
+
+);
+
+if(
+
+!name
+
+){
+
+return;
+
+}
+
+if(
+
+saves[name]
+
+){
+
+alert(
+
+"Save already exists."
+
+);
+
+return;
+
+}
+
+saves[name]={
+
+players:[]
+
+};
+
+switchSave(name);
+
+}
+
+function removeSave(){
+
+if(
+
+Object.keys(
+
+saves
+
+).length<=1
+
+){
+
+alert(
+
+"You need at least one save."
+
+);
+
+return;
+
+}
+
+delete saves[
+
+currentSave
+
+];
+
+currentSave=
+
+Object.keys(
+
+saves
+
+)[0];
+
+players=
+
+saves[
+
+currentSave
+
+].players;
+
+saveEverything();
+
+}
+
+console.log(
+
+"Prototype Chunk 1 loaded."
+
+);
+// ======================================
+// Prototype
+// Chunk 2
+// Players + Refresh
+// ======================================
+
+// ---------- Sliders ----------
+
+danger.oninput=()=>{
+
+dangerValue.textContent=
+
+danger.value;
+
+drawGraph();
+
+};
+
+difficulty.oninput=()=>{
+
+difficultyValue.textContent=
+
+difficulty.value;
+
+drawGraph();
+
+};
+
+playerName.oninput=
+
+drawGraph;
+
+rarity.onchange=
+
+drawGraph;
+
+// ---------- Add Player ----------
+
+addPlayer.onclick=()=>{
+
+const name=
+
+playerName.value.trim();
+
+if(
+
+name===""
+
+){
+
+status.style.color=
+
+"#dc2626";
+
+status.textContent=
+
+"Please enter a player.";
+
+return;
+
+}
+
+players.push({
+
+id:
+
+Date.now().toString()
+
++
+
+Math.random(),
+
+name:name,
+
+danger:Number(
+
+danger.value
+
+),
+
+difficulty:Number(
+
+difficulty.value
+
+),
+
+rarity:
+
+rarity.value,
+
+description:""
+
+});
+
+normalizePlayers();
+
+saveEverything();
+
+playerName.value="";
+
+danger.value=12;
+
+difficulty.value=12;
+
+dangerValue.textContent=12;
+
+difficultyValue.textContent=12;
+
+status.style.color=
+
+"#16a34a";
+
+status.textContent=
+
+"Player added.";
+
+refresh();
+
+};
+
+// ---------- Delete ----------
+
+function deletePlayer(id){
+
+players=
+
+players.filter(
+
+player=>
+
+player.id!==id
+
+);
+
+saveEverything();
+
+refresh();
+
+}
+
+// ---------- Search ----------
+
+search.oninput=
+
+refresh;
+
+sort.onchange=
+
+refresh;
+
+// ---------- Refresh ----------
+
+function refresh(){
+
+normalizePlayers();
+
+let list=[
+
+...players
+
+];
+
+const query=
+
+search.value
+
+.toLowerCase()
+
+.trim();
+
+if(query){
+
+list=list.filter(
+
+player=>
+
+player.name
+
+.toLowerCase()
+
+.includes(
+
+query
+
+)
+
+);
+
+}
+
+switch(
+
+sort.value
+
+){
+
+case
+
+"danger":
+
+list.sort(
+
+(a,b)=>
+
+b.danger-
+
+a.danger
+
+);
+
+break;
+
+case
+
+"difficulty":
+
+list.sort(
+
+(a,b)=>
+
+b.difficulty-
+
+a.difficulty
+
+);
+
+break;
+
+case
+
+"rarity":
+
+const rarityOrder={
+
+Legendary:7,
+
+Epic:6,
+
+Rare:5,
+
+"Three-Quarters-Rare":4,
+
+"Semi-Rare":3,
+
+Uncommon:2,
+
+Common:1
+
+};
+
+list.sort(
+
+(a,b)=>
+
+rarityOrder[
+
+b.rarity
+
+]
+
+-
+
+rarityOrder[
+
+a.rarity
+
+]
+
+);
+
+break;
+
+default:
+
+list.sort(
+
+(a,b)=>
+
+a.name.localeCompare(
+
+b.name
+
+)
+
+);
+
+}
+// ---------- Refresh Continued ----------
+
+playerCount.textContent=
+
+list.length;
+
+playerList.innerHTML="";
+
+if(
+
+list.length===0
+
+){
+
+playerList.innerHTML=
+
+"No players.";
+
+}else{
+
+list.forEach(player=>{
+
+const card=
+
+document.createElement(
+
+"div"
+
+);
+
+card.className=
+
+"player";
+
+card.innerHTML=`
+
+<div class="playerInfo">
+
+<div class="playerName">
+
+${player.name}
+
+</div>
+
+<div class="playerStats">
+
+${player.rarity}
+
+<br>
+
+Danger:
+${player.danger}/25
+
+<br>
+
+Difficulty:
+${player.difficulty}/25
+
+</div>
+
+</div>
+
+<div class="playerButtons">
+
+<button class="infoBtn">
+
+Open
+
+</button>
+
+<button class="deleteBtn">
+
+Delete
+
+</button>
+
+</div>
+
+`;
+
+card.querySelector(
+
+".infoBtn"
+
+).onclick=()=>{
+
+openPlayer(
+
+player
+
+);
+
+};
+
+card.querySelector(
+
+".deleteBtn"
+
+).onclick=()=>{
+
+deletePlayer(
+
+player.id
+
+);
+
+};
+
+playerList.appendChild(
+
+card
+
+);
+
+});
+
+}
+
+if(
+
+typeof drawGraph===
+
+"function"
+
+){
+
+drawGraph(
+
+list
+
+);
+
+}
+
+}
+
+// ---------- Startup ----------
+
+refresh();
+
+console.log(
+
+"Prototype Chunk 2 loaded."
+
+);
+
+// ======================================
+// Chunks 1-2 Complete
+// Chunks 3-6 should now have
+// the required foundation.
+// ======================================
+  
+// ======================================
+// Prototype
 // Chunk 3
 // Player Modal + Import / Export
 // ======================================
